@@ -106,7 +106,7 @@ stats = [0, 0, 0]
 
 def delo(answer):
     if answer.isdigit() == True:
-            connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432, client_encoding="utf-8")
+            connection = create_connection('data_name', 'USER', password, 'IP', *port, client_encoding="utf-8")
             cur = connection.cursor()
             #delo = input("Введите номер " )
             cur.execute(f"SELECT delo.id_usl_sp as id, delo.cl as cl, delo.prich as pr, usl_sp.naz as naz FROM delo.delo left join uslugi.usl_sp on usl_sp.id = delo.id_usl_sp where delo.num = {answer}")
@@ -248,7 +248,7 @@ def echo(update: Update, context: CallbackContext) -> None:
 
 def main():
     """Start the bot."""
-    updater = Updater("1432483112:AAH_88QEWS4kTmGoHF47Ag0xPmT5OZh_iI0", use_context=True)
+    updater = Updater("TOKEN, use_context=True)
  
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
