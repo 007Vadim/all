@@ -31,7 +31,7 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print(f"The error '{e}' occurred")
     return connection
 
-TOKEN = '1852723832:AAHfi5nOfcDYp7mgj27yARb8zCwHyfe6dNI'
+TOKEN = 'token'
 bot = telebot.TeleBot(TOKEN, threaded=True)
 
 SUMMA =()
@@ -172,7 +172,7 @@ def gudz(message):
     us=(1284787275)
     print(message.chat.id, message.chat.first_name, message.chat.last_name, message.chat.username, message.text)
     if message.text == '/gudz new':
-        connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+        connection = create_connection(*параметры подключения*)
         cur = connection.cursor()
         cur.execute('select count(id) as kol from site.bo_new_dela(297) where colplan = 0')
         s= cur.fetchone()[0]
@@ -191,7 +191,7 @@ def hangina(message):
     us=(240099489)
     print(message.chat.id, message.chat.first_name, message.chat.last_name, message.chat.username, message.text)
     if message.text == '/hangina new':
-        connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+        connection = create_connection(*параметры подключения*)
         cur = connection.cursor()
         cur.execute('select count(id) as kol from site.bo_new_dela(296) where colplan = 0')
         s= cur.fetchone()[0]
@@ -210,7 +210,7 @@ def chudnova(message):
     us_ch=(411268462)
     print(message.chat.id, message.chat.first_name, message.chat.last_name, message.chat.username, message.text)
     if message.text == '/chudnova new':
-        connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+        connection = create_connection(*параметры подключения*)
         cur = connection.cursor()
         cur.execute('select count(id) as kol from site.bo_new_dela(170) where colplan = 0')
         s= cur.fetchone()[0]
@@ -230,7 +230,7 @@ def chudnova(message):
     #us_ch=(411268462)
     print(message.chat.id, message.chat.first_name, message.chat.last_name, message.chat.username, message.text)
 #     if message.text == '/chudnova new':
-#         connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+#         connection = create_connection(*параметры подключения*)
 #         cur = connection.cursor()
 #         cur.execute('select count(id) as kol from site.bo_new_dela(170) where colplan = 0')
 #         s= cur.fetchone()[0]
@@ -247,7 +247,7 @@ def chudnova(message):
     #us_ch=(411268462)
     print(message.chat.id, message.chat.first_name, message.chat.last_name, message.chat.username, message.text)
 #     if message.text == '/chudnova new':
-#         connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+#         connection = create_connection(*параметры подключения*)
 #         cur = connection.cursor()
 #         cur.execute('select count(id) as kol from site.bo_new_dela(170) where colplan = 0')
 #         s= cur.fetchone()[0]
@@ -268,9 +268,9 @@ def chudnova(message):
 #     url= 'https://apiegrn.ru/api/cadaster/search'
 #     headers= requests.options('https://apiegrn.ru/api/cadaster/search').headers
 #     headers['Content-Type'] = 'application/json'
-#     headers['Token'] = 'KKHD-NAOZ-LLA4-UTUJ'
+#     headers['Token'] = 'токен апи'
 #     #headersAuth = headers
-#     #headers = {'Token': 'KKHD-NAOZ-LLA4-UTUJ','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
+#     #headers = {'Token': 'токен апи','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
 #     payload = {f"query": kadnumber,
 #         "mode": "normal",
 #         "grouped": 0}
@@ -298,9 +298,9 @@ def cadnum1(message):
     url= 'https://apiegrn.ru/api/cadaster/objectInfoFull'
     headers= requests.options('https://apiegrn.ru/api/cadaster/objectInfoFull').headers
     headers['Content-Type'] = 'application/json'
-    headers['Token'] = 'KKHD-NAOZ-LLA4-UTUJ'
+    headers['Token'] = 'токен апи'
     #headersAuth = headers
-    #headers = {'Token': 'KKHD-NAOZ-LLA4-UTUJ','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
+    #headers = {'Token': 'токен апи','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
     payload = {f"query": kadnumber,
         "deep": 0}
     res = requests.post(url, json = payload, headers = headers)
@@ -335,9 +335,9 @@ def kadastr(message):
     url= 'https://apiegrn.ru/api/cadaster/search'
     headers= requests.options('https://apiegrn.ru/api/cadaster/search').headers
     headers['Content-Type'] = 'application/json'
-    headers['Token'] = 'KKHD-NAOZ-LLA4-UTUJ'
+    headers['Token'] = 'токен апи'
     #headersAuth = headers
-    #headers = {'Token': 'KKHD-NAOZ-LLA4-UTUJ','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
+    #headers = {'Token': 'токен апи','Content-Type': 'application/json', 'User-Agent': 'Mozilla'}  
     payload = {"query": adres,
     "mode": "normal",
     "grouped": 0}
