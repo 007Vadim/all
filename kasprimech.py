@@ -58,7 +58,7 @@ def index():
         if request.method == 'POST' and tx and delo != None:
             if delo[len(delo)-1:] == ',':
                 delo = delo[:-1]
-            connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+            connection = create_connection(*доступ к БД*)
             cur = connection.cursor()
             cur.execute(f"UPDATE delo.delo set primech = CONCAT_WS(' ', primech, '|', '{tx}') WHERE num IN ({delo});")
             connection.commit()
@@ -86,7 +86,7 @@ def egrn():
     dat = request.form.get('dat')
     try:
         if request.method == 'POST' and dat != None:
-            connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+            connection = create_connection(*доступ к БД*)
             cur = connection.cursor()
             cur.execute(f'''SELECT *,
               '{dat}'::date-dat_ep_et as day_past,
@@ -175,7 +175,7 @@ def inde():
     dela = request.form.get('delo')
     try:
         if request.method == 'POST' and dela != None:
-            connection = create_connection('mfc_azov', 'webguest', 11, '172.20.111.31', 5432)
+            connection = create_connection(*доступ к БД*)
             cur = connection.cursor()
             cur.execute(f"select fam as fam, nam as nam, otch as ot, fadr as adr, telmob as tel, tel, num as num, naz as naz from delo.delo inner join clients.zakf on zakf.idf=delo.idf inner join isp.sp_struc on sp_struc.ids=delo.ids_open where num in ({dela});")
             connection.commit()
