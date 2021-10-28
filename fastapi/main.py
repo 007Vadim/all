@@ -16,6 +16,9 @@ PATH = 'C:/Users/мфц/PycharmProjects/fastapi/data/'
 
 @app.put("/frame/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
+    for file in files:
+        if file.content_type != 'image/jpeg' or len(files) > 15:
+            return 'Ошибка'
     dat = datetime.today().strftime('%Y-%m-%d')
     if not os.path.exists(f'{PATH}{dat}'):
         os.makedirs(f'{PATH}{dat}')
