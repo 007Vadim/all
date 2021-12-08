@@ -1,0 +1,68 @@
+import psycopg2
+from psycopg2 import OperationalError
+def create_connection(db_name, db_user, db_password, db_host, db_port):
+    connection = None
+    try:
+        connection = psycopg2.connect(
+            database=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port,
+        )
+        print("Connection to PostgreSQL DB successful")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
+    return connection
+
+
+# In[ ]:
+
+
+from datetime import datetime
+from DateTime import DateTime
+import time
+import telebot
+from telebot import util
+TOKEN = 'ТОКЕН'
+bot = telebot.TeleBot(TOKEN, threaded=True)
+while True:
+    t = time.localtime()
+    current_time = time.strftime("%H:%M:%S", t)
+    if '08:00:00' <= current_time <= '17:00:00':
+        connection = create_connection(ПОДКЛЮЧЕНИЕ К БАЗЕ)
+        cur = connection.cursor()
+        cur.execute(f"""select que.fio, que.dtz, que.idq, sp_que.ids, sp_struc.naz from queue.que join queue.sp_que on sp_que.id=que.idq join isp.sp_struc on sp_struc.ids=sp_que.ids""")
+        a=cur.fetchall()
+        connection.close()
+        if len(a) == 0:
+            pass
+            #print('Пусто')
+        else:
+            for i in a:
+                dt = DateTime()
+                v=dt.ISO()
+                fmt = '%Y-%m-%d %H:%M:%S'
+                d1 = datetime.strptime(v, fmt)
+                #print(d1)
+                d2 = datetime.strptime(str(i[1]), fmt)
+                daysDiff = (d1-d2).seconds
+                if daysDiff // 60 > 10:
+                    print(f'''---Внимание---
+{i[0]}, 
+Время записи: {i[1]},
+{i[4].rstrip()},
+Время ожидания: {daysDiff // 60} минут
+''')
+                    bot.send_message(-ЙД ЧАТА, f'''---Внимание---
+{i[0]}, 
+Время записи: {i[1]},
+{i[4].rstrip()},
+Время ожидания: {daysDiff // 60} минут
+''')
+        time.sleep(300)
+    else:
+        dt = DateTime()
+        print('час',dt.ISO())
+        time.sleep(3600)
+        pass
