@@ -1,0 +1,97 @@
+import psycopg2
+from psycopg2 import OperationalError
+from flask import Flask, request
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
+import time
+from flask import Response
+import pandas as pd
+
+w={'Самарское': '32', 'Кулешовка': '33', 'Круглое':'36','Победа':'37','Овощной':'38','Головатовка':'39','Александровка':'40','Кагальник':'41','Пешково':'42','Отрадовка':'45','Елизаветовка':'48','Порт-Катон':'49','Кугей':'50','Новоалександровка':'53','Гусарева Балка':'54','Семибалки':'55','Азов':'56','Красный сад':'58'}
+
+def create_connection(db_name, db_user, db_password, db_host, db_port):
+    connection = None
+    try:
+        connection = psycopg2.connect(
+            database=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port,
+        )
+        print("Connection to PostgreSQL DB successful")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
+    return connection
+
+app = Flask(__name__)
+
+@app.route('/', methods=['POST', 'GET'])
+def egrn():
+    dat = request.form.get('dat')
+    try:
+        if request.method == 'POST' and dat != None:
+            connection = create_connection(ПОДКЛЮЧЕНИЕ)
+            cur = connection.cursor()
+            cur.execute(
+                f"""select delo.num, delo.id from delo.delo inner join egrn.statement on delo.id = statement.id_delo inner join egrn.statement_delivery on statement.id = statement_delivery.id_statement where id_usl_sp=1804 and dat = '{dat}' and statement_delivery.result ILIKE '%"dataReceiveForm":"paper"%'""")
+            # connection.commit()
+            spis = cur.fetchall()
+            if len(spis) == 0:
+                return '''<center><p style="color: blue; font-family: 'Arial', sans-serif; font-size: 28pt;">Дел нет!</p></center>'''
+                # return "<h1>Дел нет!</h1>"
+            cur.close()
+            connection.close()
+            b=[]
+            for i in spis:
+                b.append(i[0])
+            #b.sort()
+            return (f'''<center><p style="color: red; font-family: 'Arial', sans-serif; font-size: 28pt;">Список: {set(b)}</p></center>
+            <center><p style="color: red; font-family: 'Arial', sans-serif; font-size: 28pt;">Количество: {len(set(b))}</p></center>''')
+            # return (f"<h1>Список: {z}</h1>\n"
+
+    except:
+        return "<center><h1>Ошибка данных!</h1></center>"
+
+    return ("<center>\n"
+            "<form method=\"post\">\n"
+            "   <input type=\"date\" name=\"dat\" required=\"required\" value=\"09.02.2015\">\n"
+            "   <input type=\"submit\" Value=\"Сформировать!\">\n"
+            "</form>\n</center>")
+
+@app.route('/ochered')
+def ochered():
+    try:
+        connection = create_connection(ПОДКЛЮЧЕНИЕ)
+        z = []
+        for key, value in w.items():
+            cur = connection.cursor()
+            cur.execute(f'''SELECT COUNT(*) FROM queue.onpriem WHERE idq = {value}
+            UNION ALL 
+            SELECT COUNT(*) FROM queue.que  WHERE idq = {value}
+            UNION ALL 
+            SELECT COUNT(*) FROM queue.stat WHERE idq = {value} AND dat_p::date = CURRENT_DATE''')
+            rows = cur.fetchall()
+            rows.append(key)
+            z.append(rows)
+        s4 = pd.DataFrame(z)
+        #s4.index = s4.index + 1
+        s4[0] = s4[0].astype(str).str.replace(r"[\[\](),']", '')
+        s4[1] = s4[1].astype(str).str.replace(r"[\[\](),']", '')
+        s4[2] = s4[2].astype(str).str.replace(r"[\[\](),']", '')
+        s4.columns = ['На приеме', 'В очереди', 'Обслужено', 'Название']
+        s4 = s4.sort_values(by='Название').reset_index(drop=True)
+        s4.index = s4.index + 1
+        connection.close()
+            #s4.to_excel(f'{current_date}.xlsx', header=['№ дела', 'Услуга', 'Дата открытия дела', 'Заказчик', 'Адрес', 'Дней просрочки',                                'КУВД'], columns=[3, 11, 5, 19, 4, 18, 20])
+            #s4 = get_dataframe_from_somewhere()
+        return Response(s4.to_html(header="true", table_id="table", justify="center"))
+            #return Response(s4.to_json(orient="records"), mimetype='application/json')
+            #return send_from_directory('path_to_file', filename = '2021-03-24.xlsx')
+    except:
+        return "<h1>Ошибка данных!</h1>"
+
+
+if __name__ == "__main__":
+    app.run(host='172.20.111.55', port=5611)
