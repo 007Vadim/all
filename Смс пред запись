@@ -1,0 +1,114 @@
+import psycopg2
+from psycopg2 import OperationalError
+from gsmmodem.modem import GsmModem
+import sqlite3
+import schedule, time
+import subprocess
+import psutil
+
+def create_connection(db_name, db_user, db_password, db_host, db_port):
+    connection = None
+    try:
+        connection = psycopg2.connect(
+            database=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port,
+        )
+        print("Connection to PostgreSQL DB successful")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
+    return connection
+
+
+def insertData(tel, sms, status):
+    conn = sqlite3.connect("sms_pred_zap.db")
+    conn.execute("""INSERT INTO sms_pred_zap(tel, sms, status) VALUES ('{0}', '{1}', '{2}')""".format(tel, sms, status))
+    conn.commit()
+    conn.close()
+
+
+def print_sms(sms):
+    print (dir(sms))
+
+
+def handleSms(sms):
+    print (dir(sms))
+
+
+PORT = 'com13'
+modem = GsmModem(PORT, 115200, smsReceivedCallbackFunc=handleSms)
+# modem = GsmModem(PORT, 9600)
+modem.smsTextMode = False
+
+
+def main():
+    #Подлючаемся к БД, запрашиваем данные
+    connection = create_connection(ПОДКЛЮЧЕНИЕ К БАЗЕ)
+    cur = connection.cursor()
+    cur.execute(f"""select fio, dt, sp_struc.naz, phone, tel 
+                    from queue.zapis 
+                    join queue.sp_que on sp_que.id=zapis.idq 
+                    join isp.sp_struc on sp_struc.ids=sp_que.ids 
+                    join isp.isp ON sp_struc.ids=isp.ids 
+                    where dt::date = CURRENT_DATE+1 and phone <> ''""")
+#select que.fio, que.dtz, que.idq, sp_que.ids, sp_struc.naz from queue.que join queue.sp_que on sp_que.id=que.idq join isp.sp_struc on sp_struc.ids=sp_que.ids
+    a=cur.fetchall()
+    connection.close()
+    print('Количество с базы',len(a))
+
+    for process in (process for process in psutil.process_iter() if process.name()=="Connect Manager.exe"):
+        process.kill()
+        print('Закрыли Коннект')
+    time.sleep(5)
+#Формируем текст смс и отправляем
+    w=0
+    modem.connect()
+    for i in a[:]:
+        if i[3] != '':
+            if i[3][0] == '(':
+                tel_sms='+7'+''.join([i for i in i[3] if i.isdigit()])
+            elif len(i[3])>12:
+                print(f'''ОШИБКА {i[3]}''')
+                continue
+            elif len(i[3])<10:
+                print(f'''ОШИБКА {i[3]}''')
+                continue
+            elif '88' in i[3][:3]:
+                print(f'''ОШИБКА {i[3]}''')
+                continue
+            elif '+78' in i[3]:
+                print(f'''ОШИБКА {i[3]}''')
+                continue
+            elif '+77' in i[3]:
+                print(f'''ОШИБКА {i[3]}''')
+                continue
+            elif i[3][0] == '9':
+                tel_sms='+7'+''.join([i for i in i[3] if i.isdigit()])
+            elif i[3][0] == '8':
+                tel_sms=i[3].replace('8','+7',1)
+            elif i[3][1] == '8':
+                continue
+            else:
+                tel_sms=i[3]
+        if 'Красный' or 'Гусарева' in a[1][2].rstrip()[9:].split()[0]:
+            name_mfc=i[2].rstrip()[5:].split(',',1)[0]
+        else:
+            name_mfc=i[2].rstrip()[5:].split(',',1)[0].replace(' ','')
+            name_mfc=name_mfc.strip()
+        dat_zap=str(i[1])[8:10]+'.'+str(i[1])[5:7]+'.'+str(i[1])[0:4]
+        time=str(i[1])[11:16]
+        tel_mfc=i[4].replace(" ",'')
+        w+=1
+        sms=f"""Напоминаем о Вашей предварительной записи в МФЦ {name_mfc} {dat_zap} в {time} {tel_mfc}"""
+        send=modem.sendSms(tel_sms, sms)
+        print(f"""{w} {tel_sms} {sms} {send.status}""")
+        insertData(tel_sms, sms, send.status)
+    print('Количество отправок',w)
+    modem.close()
+
+schedule.every().day.at("13:10").do(main)
+while True:
+    schedule.run_pending()
+    time.sleep(10)
