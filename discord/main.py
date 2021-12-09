@@ -100,7 +100,7 @@ async def on_message(message):
     print("{} sent a message".format(message.author.name))
     if message.content.lower().startswith("!lvl"):
         msg = "You have {} points!".format(get_points(message.author))
-        await bot.process_commands(message.channel, msg)
+        await message.channel.send(msg)
     add_points(message.author, 1)
 
 bot.run(TOKEN)
